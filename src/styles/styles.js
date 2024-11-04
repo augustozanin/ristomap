@@ -2,7 +2,9 @@ import { StyleSheet } from "react-native";
 
 export const colors = {
   vermelho: "#770602",
-  backgroud: "#F7EEE9",
+  begeBG: "#F7EEE9",
+  branco: "#FFFFFF",
+  cinza: "#898A8D"
 };
 
 export const fontSizes = {
@@ -22,6 +24,6 @@ export const globalStyles = StyleSheet.create({
   },
   botaoTexto: {
     fontSize: fontSizes.medio,
-    color: "#FFFFFF",
+    color: colors.branco,
   },
 });

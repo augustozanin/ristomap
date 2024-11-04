@@ -147,18 +147,18 @@ export default function Login({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroud,
+    backgroundColor: colors.begeBG,
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
   },
   botaoTextoSenha: {
     fontSize: 16,
-    color: "#898A8D",
+    color: colors.cinza,
   },
   botaoSenha: {
     borderBottomWidth: 0.8,
-    borderBottomColor: "#898A8D",
+    borderBottomColor: colors.cinza,
     width: "50%",
   },
   containerSenha: {
@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
   },
   botaoCadastro1: {
     borderWidth: 1,
-    borderColor: "#770602",
-    backgroundColor: "#F7EEE9",
+    borderColor: colors.vermelho,
+    backgroundColor: colors.begeBG,
   },
   textoBotaoCadastro1: {
-    color: "#770602",
+    color: colors.vermelho,
   },
 });

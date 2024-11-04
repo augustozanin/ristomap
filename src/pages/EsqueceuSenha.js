@@ -20,11 +20,10 @@ export default function ForgotPasswordScreen() {
       <Text style={styles.label}>Digite seu e-mail:</Text>
       <TextInput
         style={styles.input}
-        placeholder="Digite seu e-mail"
-        placeholderTextColor="#FFFFFF"
+        placeholder="email"
+        placeholderTextColor= {colors.branco}
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
       />
       <RMButton
         titulo="Enviar Código"
@@ -54,7 +53,7 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7EEE9",
+    backgroundColor: colors.begeBG,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -68,7 +67,6 @@ const styles = StyleSheet.create({
     width: '80%',
     height: 40,
     backgroundColor: colors.vermelho,
-    color: '#FFFFFF',
     borderRadius: 10,
     paddingHorizontal: 10,
     marginBottom: 20,
@@ -86,7 +84,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     backgroundColor: colors.vermelho,
-    color: '#FFFFFF',
+    color: colors.branco,
     fontSize: fontSizes.medio,
     borderRadius: 10,
     textAlign: 'center',

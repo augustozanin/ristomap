@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
+import { colors, fontSizes, globalStyles } from '../styles/styles';
 
 const Pesquisa = () => {
   return (
@@ -14,7 +15,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F7EEE9",
+    backgroundColor: colors.begeBG,
   },
 });
 

@@ -29,6 +29,6 @@ const styles = StyleSheet.create({
   },
   botaoTexto: {
     fontSize: fontSizes.medio,
-    color: "#FFFFFF",
+    color: colors.branco,
   },
 });

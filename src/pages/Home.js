@@ -3,6 +3,8 @@ import React from "react";
 import TopBar from "../components/TopBar";
 import Post from "../components/Post";
 import { useAuth } from "../context/AuthContext";
+import { colors, fontSizes, globalStyles } from '../styles/styles';
+
 
 export default function Home({ navigation }) {
   const { user, token } = useAuth();
@@ -27,7 +29,7 @@ export default function Home({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F7EEE9",
+    backgroundColor: colors.begeBG,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
