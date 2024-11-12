@@ -18,11 +18,10 @@ function TopBar({navigation}) {
             style={styles.icone}
           />
         </TouchableOpacity>
-
-
+        
         <TouchableOpacity 
         style={styles.botaoIcone}
-        onPress={() => navigation.navigate("Map")}>
+        onPress={() => navigation.navigate("Map_Page")}>
           <Image
             source={location} 
             style={styles.icone}
@@ -57,10 +56,12 @@ function TopBar({navigation}) {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
+      alignSelf: "center",
       backgroundColor: colors.vermelho, 
       paddingVertical: 5,
       paddingHorizontal: 50,
-      borderRadius: 20
+      borderRadius: 15,
+      width: "70%"
     },
     botaoIcone: {
       padding: 10,
