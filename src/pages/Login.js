@@ -110,7 +110,7 @@ export default function Login({ navigation }) {
           Ainda não possui um cadastro?
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Cadastro")}
+          onPress={() => navigation.navigate("EscolherCadastro")}
           style={styles.botaoCadastro}
         >
           <Text style={[styles.botaoTextoCadastro, { fontWeight: "bold" }]}>

@@ -60,8 +60,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: fontSizes.medio,
-    color: colors.vermelho,
-    marginVertical: 10,
+    marginVertical: 15,
   },
   input: {
     width: '80%',
