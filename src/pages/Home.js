@@ -23,7 +23,7 @@ export default function Home({ navigation }) {
       <Text>Sua senha {user.senha}</Text>
       <Text>{token}</Text>
       <Button title="Logout" onPress={() => navigation.replace("Login")} />
-      <RMButtonPost/>
+      <RMButtonPost onPress={() => navigation.navigate("CriaPost")} />
     </View>
   );
 }

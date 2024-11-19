@@ -2,9 +2,9 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import React from 'react'
 import { colors, fontSizes } from '../styles/styles';
 
-export default function RMButtonPost() {
+export default function RMButtonPost({...rest}) {
   return (
-      <TouchableOpacity style={styles.botao}>
+      <TouchableOpacity style={styles.botao}  {...rest} >
         <Text style={styles.botaoTexto}>+</Text>
       </TouchableOpacity>
   )
