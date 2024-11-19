@@ -34,7 +34,7 @@ function TopBar({navigation}) {
         onPress={() => navigation.navigate("User")}>
           <Image
             source={user} 
-            style={styles.icone}
+            style={styles.icone_user}
           />
         </TouchableOpacity>
 
@@ -59,15 +59,20 @@ function TopBar({navigation}) {
       alignSelf: "center",
       backgroundColor: colors.vermelho, 
       paddingVertical: 5,
-      paddingHorizontal: 50,
+      paddingHorizontal: 80,
       borderRadius: 15,
-      width: "70%"
+      width: "90%",
+      height: "7%"
     },
     botaoIcone: {
       padding: 10,
     },
     icone: {
-      width: 24,
+      width: 25,
+      height: 24,
+    },
+    icone_user: {
+      width: 30,
       height: 24,
     },
   });
