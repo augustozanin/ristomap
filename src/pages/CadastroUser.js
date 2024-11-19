@@ -7,8 +7,6 @@ import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabase";
-import bcrypt from 'react-native-bcrypt';
-import { supabase } from "../context/supabase";
 
 export default function CadastroUser({ navigation }) {
   const [usuario, setUsuario] = useState(null);
