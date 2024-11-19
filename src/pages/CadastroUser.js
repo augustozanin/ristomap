@@ -8,6 +8,7 @@ import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabase";
 import bcrypt from 'react-native-bcrypt';
+import { supabase } from "../context/supabase";
 
 export default function CadastroUser({ navigation }) {
   const [usuario, setUsuario] = useState(null);
@@ -64,15 +65,14 @@ export default function CadastroUser({ navigation }) {
     setLoading(true);
 
     try {
-      // hash senha
+  
       if (typeof senha !== 'string') {
         throw new Error('Senha inválida.');
-      }      const salt = bcrypt.genSaltSync(10);
-      const hashedPassword = bcrypt.hashSync(senha, salt);
+      }      
       
       // inserindo supabase
-      const { data, error } = await supabase.from('users').insert([
-        { username: usuario, email, password: hashedPassword },
+      const { data, error } = await supabase.from('user').insert([
+        { username: usuario, email, password: senha },
       ]);
 
       if (error) {

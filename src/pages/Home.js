@@ -4,7 +4,7 @@ import TopBar from "../components/TopBar";
 import Post from "../components/Post";
 import { useAuth } from "../context/AuthContext";
 import { colors, fontSizes, globalStyles } from '../styles/styles';
-
+import RMButtonPost from "../components/RMButtonPost";
 
 export default function Home({ navigation }) {
   const { user, token } = useAuth();
@@ -23,6 +23,7 @@ export default function Home({ navigation }) {
       <Text>Sua senha {user.senha}</Text>
       <Text>{token}</Text>
       <Button title="Logout" onPress={() => navigation.replace("Login")} />
+      <RMButtonPost onPress={() => navigation.navigate("CriaPost")} />
     </View>
   );
 }
