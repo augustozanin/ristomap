@@ -67,12 +67,11 @@ export default function CadastroUser({ navigation }) {
       // hash senha
       if (typeof senha !== 'string') {
         throw new Error('Senha inválida.');
-      }      const salt = bcrypt.genSaltSync(10);
-      const hashedPassword = bcrypt.hashSync(senha, salt);
+      }      
       
       // inserindo supabase
-      const { data, error } = await supabase.from('users').insert([
-        { username: usuario, email, password: hashedPassword },
+      const { data, error } = await supabase.from('user').insert([
+        { username: usuario, email, password: senha },
       ]);
 
       if (error) {
