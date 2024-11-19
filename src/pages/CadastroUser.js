@@ -6,7 +6,7 @@ import RMLogo from "../components/RMLogo";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../context/supabase";
+import { supabase } from "../services/supabase";
 import bcrypt from 'react-native-bcrypt';
 
 export default function CadastroUser({ navigation }) {
