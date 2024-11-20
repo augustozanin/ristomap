@@ -9,6 +9,8 @@ import { supabase } from '../services/supabase';
 import startempty from '../assets/images/starempty.png';
 import starfull from '../assets/images/starfull.png'
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system'
+import { decode } from 'base64-arraybuffer';
 
 
 
@@ -32,42 +34,37 @@ export default function CriaPost({ navigation }) {
   // Função para selecionar a imagem
   const selecionarImagem = async () => {
     try {
-      // Solicitar permissões para acessar a galeria
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permissionResult.granted) {
-        Alert.alert("Permissão necessária", "É necessário permitir o acesso à galeria.");
-        return;
-      }
-
-      // Abrir a galeria para escolher uma imagem
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'], // Usando o formato correto
-        allowsEditing: true, // Permitir edição
-        quality: 0.8, 
-      });
-
-      console.log(result);
-
+      await ImagePicker.requestCameraPermissionsAsync();
+      const result = await ImagePicker.
+        launchCameraAsync({
+          cameraType: ImagePicker.CameraType.back,
+          allowsEditing: true,
+          quality: 0.8
+        });
       // Verificar se a seleção foi cancelada
       if (!result.canceled) {
-        setImagemLocal(result.assets[0].uri); // Salvar a URI da imagem selecionada
+        const selectedImage = result.assets[0];
+        setImagemLocal(selectedImage.uri); // Salvar a URI da imagem selecionada
+
       }
     } catch (error) {
       console.error("Erro ao selecionar imagem:", error);
+      alert("Erro ao selecionar imagem:", error)
     }
   };
 
   // Função para fazer o upload da imagem no Supabase
   const uploadImagem = async () => {
+    console.log('valor da variavel imagem local é ', imagemLocal)
     if (!imagemLocal) return null;
 
-    const { fileName, uri, type } = imagemLocal;
-    const nomeArquivo = `${Date.now()}-${fileName}`; // Nome único para a imagem
+    const base64 = await FileSystem.readAsStringAsync(imagemLocal, { encoding: 'base64' });
+    const filePath = `${new Date().getTime()}.jpeg`
 
     try {
       const { data, error } = await supabase.storage
-        .from('imagens-posts') // Certifique-se de que este bucket exista no Supabase
-        .upload(nomeArquivo, { uri, name: fileName, type }, { contentType: type });
+        .from('imagens-posts')
+        .upload(filePath, decode(base64), { contentType: 'image/jpeg' });
 
       if (error) {
         console.error('Erro ao fazer upload da imagem:', error.message);
@@ -75,12 +72,15 @@ export default function CriaPost({ navigation }) {
       }
 
       // Obter a URL pública da imagem
-      const { publicUrl } = supabase.storage
+      const { data: publicUrlData } = supabase.storage
         .from('imagens-posts')
-        .getPublicUrl(nomeArquivo);
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
 
       setImagemURL(publicUrl); // Salvar URL no estado
       return publicUrl;
+
     } catch (error) {
       console.error('Erro inesperado no upload da imagem:', error);
       return null;
@@ -107,6 +107,16 @@ export default function CriaPost({ navigation }) {
     setErroEstrela(false)
     setErroImgUrl(false)
 
+    const url = await uploadImagem(); // Faz o upload da imagem antes
+
+
+    if (!url) {
+      setErroImgUrl(true);
+      return;
+    }
+
+    setImagemURL(url);
+
     if (!titulo) {
       setErroTitulo(true)
     }
@@ -119,14 +129,7 @@ export default function CriaPost({ navigation }) {
       setErroEstrela(true)
     }
 
-    // Fazer upload da imagem antes de criar o post
-    const imagemUrl = await uploadImagem();
-
-    if (imagemUrl == null) {
-      setErroImgUrl(true)
-    }
-
-    if (!titulo || !descricao || estrelas.filter((star) => star).length == 0 || !imagemUrl) {
+    if (!titulo || !descricao || estrelas.filter((star) => star).length == 0) {
       return
     }
 
@@ -135,23 +138,19 @@ export default function CriaPost({ navigation }) {
 
     try {
       estrelasAvaliadas = estrelas.filter((star) => star).length
-      console.log('Opa vamos tentar cadastrar um POST!!! dados a seguir ')
-      console.log(user.usuario, titulo, descricao, estrelasAvaliadas, imagemUrl)
+      console.log(user.usuario, titulo, descricao, estrelasAvaliadas, url)
 
       // inserindo post no supabase
       const { data, error } = await supabase.from('post').insert([
         {
           user_username: user.usuario, title: titulo, description: descricao, rating: estrelasAvaliadas,
-          link_img: imagemUrl
+          link_img: url
         },
       ]);
 
       if (error) {
         Alert.alert('Erro', error.message);
       } else {
-        //ir pra home apos criar conta
-        setUser({ username: usuario, email });
-
         Alert.alert('Sucesso', 'Post criado!');
         navigation.replace('Home');
       }
