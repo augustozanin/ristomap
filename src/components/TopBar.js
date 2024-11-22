@@ -62,7 +62,11 @@ function TopBar({navigation}) {
       paddingHorizontal: 80,
       borderRadius: 15,
       width: "90%",
-      height: "7%"
+      height: "7%",
+      position: 'absolute', 
+      top: 0, 
+      zIndex: 1, 
+      marginTop: "5%"
     },
     botaoIcone: {
       padding: 10,
