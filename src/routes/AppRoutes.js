@@ -32,11 +32,7 @@ export default function AppRoutes() {
             backgroundColor: colors.begeBG
           }
         }} />
-        <AppStack.Screen name="Home" component={Home} options={{
-          headerTitle: " ", headerStyle: {
-            backgroundColor: colors.begeBG
-          }
-        }} />
+        <AppStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
         <AppStack.Screen name="User" component={User} options={{headerTitle: " ", headerStyle: {
         backgroundColor: colors.begeBG
       }}}/>
