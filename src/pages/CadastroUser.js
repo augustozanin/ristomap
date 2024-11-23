@@ -7,6 +7,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabase";
+import CryptoJS from "crypto-js";
 
 export default function CadastroUser({ navigation }) {
   const [usuario, setUsuario] = useState(null);
@@ -31,7 +32,7 @@ export default function CadastroUser({ navigation }) {
 
     setErroUsuario(false);
     setErroSenha(false);
-    setErroEmail (false);
+    setErroEmail(false);
     setErroConfirmaSenha(false);
 
     if (!usuario) {
@@ -46,7 +47,7 @@ export default function CadastroUser({ navigation }) {
       setErroEmail(true);
     }
 
-    if (!confirmaSenha){
+    if (!confirmaSenha) {
       setErroConfirmaSenha(true);
     }
 
@@ -57,20 +58,21 @@ export default function CadastroUser({ navigation }) {
     }
 
     if (!usuario || !senha || !confirmaSenha || !email) {
-    return;
+      return;
     }
 
     setLoading(true);
 
     try {
-  
       if (typeof senha !== 'string') {
         throw new Error('Senha inválida.');
-      }      
-      
+      }
+      // Criação do hash da senha com SHA-256
+      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
+
       // inserindo supabase
       const { data, error } = await supabase.from('user').insert([
-        { username: usuario, email, password: senha },
+        { username: usuario, email, password: senhaHash },
       ]);
 
       if (error) {
@@ -78,10 +80,10 @@ export default function CadastroUser({ navigation }) {
       } else {
         //ir pra home apos criar conta
         setUser({ username: usuario, email });
-        setToken('placeholder_token'); 
+        setToken('placeholder_token');
 
         Alert.alert('Sucesso', 'Conta criada com sucesso!');
-        navigation.replace('Home'); 
+        navigation.replace('Home');
       }
 
     } catch (error) {
@@ -98,7 +100,7 @@ export default function CadastroUser({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <RMLogo customStyle={{ marginBottom: 10 }} width={303} height={295} /> 
+      <RMLogo customStyle={{ marginBottom: 10 }} width={303} height={295} />
 
       <RMTextInput
         value={usuario}
@@ -116,7 +118,7 @@ export default function CadastroUser({ navigation }) {
 
       <RMTextInput
         value={senha}
-        onChangeText={(value) => setSenha (value)}
+        onChangeText={(value) => setSenha(value)}
         placeholder="Digite sua senha"
         secureTextEntry={passwordInvisible}
       >
@@ -133,7 +135,7 @@ export default function CadastroUser({ navigation }) {
 
       <RMTextInput
         value={confirmaSenha}
-        onChangeText={(value) => setConfirmaSenha (value)}
+        onChangeText={(value) => setConfirmaSenha(value)}
         placeholder="Confirme sua senha"
         secureTextEntry={passwordInvisible}
       >
@@ -149,7 +151,7 @@ export default function CadastroUser({ navigation }) {
 
       <RMButton titulo="Criar Conta" action={cadastrar} />
 
-      </View>
+    </View>
   );
 }
 

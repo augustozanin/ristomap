@@ -6,6 +6,8 @@ import RMLogo from "../components/RMLogo";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../services/supabase";
+import CryptoJS from "crypto-js";
 
 export default function Login({ navigation }) {
   const [usuario, setUsuario] = useState(null);
@@ -15,9 +17,12 @@ export default function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [passwordInvisible, setPasswordInvisible] = useState(true);
 
-  const { setToken, setUser } = useAuth();
 
-  function login() {
+
+
+  const { setUser } = useAuth();
+
+  async function login() {
     if (loading) {
       return;
     }
@@ -38,12 +43,40 @@ export default function Login({ navigation }) {
     }
     console.log("teste");
 
-    setUser({ usuario, senha });
-    setToken("sygfdytsfdygsfdhgsfdufsdgfsdhgsfdghfsdhgfshdg");
-
     setLoading(true);
 
-    navigation.replace("Home");
+    try {
+      // Consulta o Supabase para verificar se o usuário existe
+      const { data: user, error } = await supabase
+        .from("user")
+        .select("username, password")
+        .eq("username", usuario)
+        .single(); // Apenas um registro é esperado
+
+      if (error || !user) {
+        Alert.alert("Erro", "Usuário não encontrado.");
+        return;
+      }
+
+      // Hash da senha informada
+      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
+
+      // Comparação do hash da senha
+      if (senhaHash !== user.password) {
+        Alert.alert("Erro", "Senha incorreta.");
+        return;
+      }
+
+      // Login bem-sucedido
+      setUser({ username: user.username });
+      Alert.alert("Sucesso", "Login realizado com sucesso!");
+      navigation.replace("Home");
+    } catch (err) {
+      console.error("Erro ao fazer login:", err);
+      Alert.alert("Erro", "Ocorreu um erro ao tentar logar.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function informaUsuario(value) {
