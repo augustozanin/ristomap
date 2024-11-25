@@ -6,34 +6,43 @@ import RMLogo from "../components/RMLogo";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../services/supabase";
+import CryptoJS from "crypto-js";
 
-export default function Login({ navigation }) {
+export default function CadastroRestaurante({ navigation }) {
   const [usuario, setUsuario] = useState(null);
   const [senha, setSenha] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [confirmaSenha, setConfirmaSenha] = useState(null);
+  const [CNPJ, setCNPJ] = useState (null);
+
   const [erroUsuario, setErroUsuario] = useState(false);
   const [erroSenha, setErroSenha] = useState(false);
-  const [email, setEmail] = useState(null);
   const [erroEmail, setErroEmail] = useState(false);
+  const [erroConfirmaSenha, setErroConfirmaSenha] = useState(false);
+  const [erroCNPJ, setErroCNPJ] = useState (false);
 
   const [loading, setLoading] = useState(false);
   const [passwordInvisible, setPasswordInvisible] = useState(true);
 
   const { setToken, setUser } = useAuth();
 
-  function login() {
+  async function cadastrar() {
     if (loading) {
       return;
     }
 
     setErroUsuario(false);
     setErroSenha(false);
-    setErroEmail (false);
+    setErroEmail(false);
+    setErroConfirmaSenha(false);
+    setErroCNPJ (false);
 
     if (!usuario) {
       setErroUsuario(true);
     }
 
-    if (!senha) {
+    if (!senha || typeof senha !== 'string') {
       setErroSenha(true);
     }
 
@@ -41,47 +50,55 @@ export default function Login({ navigation }) {
       setErroEmail(true);
     }
 
-    if (!senha || !usuario || !email) {
+    if (!confirmaSenha) {
+      setErroConfirmaSenha(true);
+    }
+
+    if (!CNPJ) {
+      setErroCNPJ(true);
+    }
+
+    if (senha !== confirmaSenha) {
+      setErroConfirmaSenha(true);
+      Alert.alert("Erro", "As senhas não coincidem.");
       return;
     }
-    console.log("teste");
 
-    setUser({ usuario, email, senha });
-    setToken("sygfdytsfdygsfdhgsfdufsdgfsdhgsfdghfsdhgfshdg");
+    if (!usuario || !senha || !confirmaSenha || !email || !CNPJ) {
+      return;
+    }
 
     setLoading(true);
 
-    navigation.replace("Home");
-  }
+    try {
+      if (typeof senha !== 'string') {
+        throw new Error('Senha inválida.');
+      }
+      // Criação do hash da senha com SHA-256
+      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
 
-  function informaUsuario(value) {
-    if (!value) {
-      setErroUsuario(true);
-    } else {
-      setErroUsuario(false);
+      // inserindo supabase
+      const { data, error } = await supabase.from('user').insert([
+        { username: usuario, email, password: senhaHash, CNPJ},
+      ]);
+
+      if (error) {
+        Alert.alert('Erro', error.message);
+      } else {
+        //ir pra mapa apos criar conta para cadastrar marker
+        setUser({ username: usuario, email });
+        setToken('placeholder_token');
+
+        Alert.alert('Sucesso', 'Conta criada com sucesso!', 'Agora, clique no mapa onde seu restaurante é localizado, para registrar a localização em nossa base de dados');
+        navigation.replace('Home');
+      }
+
+    } catch (error) {
+      console.error('Erro inesperado:', error);
+      Alert.alert('Erro', 'Ocorreu um erro inesperado.');
+    } finally {
+      setLoading(false);
     }
-
-    setUsuario(value);
-  }
-
-  function informaEmail(value) {
-    if (!value) {
-      setErroUsuario(true);
-    } else {
-      setErroUsuario(false);
-    }
-
-    setEmail(value);
-  }
-
-  function informaSenha(value) {
-    if (!value) {
-      setErroSenha(true);
-    } else {
-      setErroSenha(false);
-    }
-
-    setSenha(value);
   }
 
   function mostrarOcultarSenha() {
@@ -90,28 +107,36 @@ export default function Login({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <RMLogo customStyle={{ marginBottom: 10 }} width={303} height={295} /> 
+      <RMLogo customStyle={{ marginBottom: 10 }} width={303} height={295} />
 
       <RMTextInput
         value={usuario}
-        onChangeText={informaUsuario}
+        onChangeText={setUsuario}
         placeholder="Digite seu usuário"
       />
       {erroUsuario ? <Text>Usuário é obrigatorio</Text> : <></>}
 
       <RMTextInput
         value={email}
-        onChangeText={informaEmail}
+        onChangeText={setEmail}
         placeholder="Digite seu email"
       />
       {erroEmail ? <Text>email é obrigatorio</Text> : <></>}
 
       <RMTextInput
+        value={CNPJ}
+        onChangeText={setCNPJ}
+        placeholder="Digite seu CNPJ"
+      />
+      {erroCNPJ ? <Text>CNPJ é obrigatorio</Text> : <></>}
+
+      <RMTextInput
         value={senha}
-        onChangeText={informaSenha}
+        onChangeText={(value) => setSenha(value)}
         placeholder="Digite sua senha"
         secureTextEntry={passwordInvisible}
       >
+
         <TouchableOpacity onPress={mostrarOcultarSenha}>
           {passwordInvisible ? (
             <FontAwesome name="eye" size={24} />
@@ -123,8 +148,8 @@ export default function Login({ navigation }) {
       {erroSenha && <Text>Senha é obrigatória</Text>}
 
       <RMTextInput
-        value={senha}
-        onChangeText={informaSenha}
+        value={confirmaSenha}
+        onChangeText={(value) => setConfirmaSenha(value)}
         placeholder="Confirme sua senha"
         secureTextEntry={passwordInvisible}
       >
@@ -138,9 +163,9 @@ export default function Login({ navigation }) {
       </RMTextInput>
       {erroSenha && <Text>Confirmação de senha é obrigatória</Text>}
 
-      <RMButton titulo="Criar Conta" action={login} />
+      <RMButton titulo="Criar Conta" action={cadastrar} />
 
-      </View>
+    </View>
   );
 }
 

@@ -15,17 +15,55 @@ const Map = () => {
       setErrorMsg('Permissão de localização negada');
       return;
     }
-
     // Obtém a localização atual
     let currentLocation = await Location.getCurrentPositionAsync({});
     setLocation(currentLocation);
   };
 
+  // Carrega os marcadores do Supabase
+  const fetchMarkers = async () => {
+    try {
+      const { data, error } = await supabase.from('markers').select('*');
+      if (error) throw error;
+      setMarkers(data);
+    } catch (error) {
+      console.error('Erro ao carregar marcadores:', error);
+    }
+  };
+
+  // Salva um marcador no Supabase
+  const saveMarker = async (newMarker) => {
+    try {
+      const { data, error } = await supabase.from('markers').insert([newMarker]);
+      if (error) throw error;
+      setMarkers((prevMarkers) => [...prevMarkers, ...data]); // Atualiza o estado local
+    } catch (error) {
+      console.error('Erro ao salvar marcador:', error);
+    }
+  };
+
+ // Adiciona um marcador ao pressionar o mapa
+ const handleMapPress = (event) => {
+  const { latitude, longitude } = event.nativeEvent.coordinate;
+
+// Exemplo de dados do marcador
+  const newMarker = {
+    latitude,
+    longitude,
+    title: 'Novo Marcador',
+    description: 'Descrição aqui',
+  };
+
+  // Salva o marcador no banco de dados
+  saveMarker(newMarker);
+}; 
+
   useEffect(() => {
     getCurrentLocation();
+    fetchMarkers ();
   }, []);
 
-  // Define as coordenadas do mapa
+  // Define o fallback de coordenadas caso não permita acesso à localização do celular
   const initialRegion = {
     latitude: location ? location.coords.latitude : -28.2623,
     longitude: location ? location.coords.longitude : -52.4103,
@@ -40,17 +78,21 @@ const Map = () => {
         region={initialRegion}
         showsUserLocation={true}
         followsUserLocation={true}
+        onPress={handleMapPress} // Permite criar marcadores ao pressionar o mapa
       >
-        {location && (
+       {markers.map((marker, index) => (
           <Marker
+            key={index}
             coordinate={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
+              latitude: marker.latitude,
+              longitude: marker.longitude,
             }}
-            title="Você está aqui"
+            title={marker.title}
+            description={marker.description}
           />
-        )}
+        ))}
       </MapView>
+      {errorMsg && Alert.alert('Erro', errorMsg)}
     </View>
   );
 };
