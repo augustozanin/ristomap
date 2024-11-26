@@ -7,70 +7,80 @@ import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabase";
-import CryptoJS from "crypto-js";
 
 export default function Login({ navigation }) {
-  const [usuario, setUsuario] = useState(null);
+  const [email, setEmail] = useState(null);
   const [senha, setSenha] = useState(null);
-  const [erroUsuario, setErroUsuario] = useState(false);
+  const [erroEmail, setErroEmail] = useState(false);
   const [erroSenha, setErroSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [passwordInvisible, setPasswordInvisible] = useState(true);
-
-
-
-
-  const { setUser } = useAuth();
+  const [user, setUser] = useState(null);
 
   async function login() {
     if (loading) {
       return;
     }
 
-    setErroUsuario(false);
+    setErroEmail(false);
     setErroSenha(false);
 
-    if (!usuario) {
-      setErroUsuario(true);
+    if (!email) {
+      setErroEmail(true);
     }
 
     if (!senha) {
       setErroSenha(true);
     }
 
-    if (!senha || !usuario) {
+    if (!senha || !email) {
       return;
     }
-    console.log("teste");
 
     setLoading(true);
 
     try {
-      // Consulta o Supabase para verificar se o usuário existe
-      const { data: user, error } = await supabase
-        .from("user")
-        .select("username, password")
-        .eq("username", usuario)
-        .single(); // Apenas um registro é esperado
+      // login supabase email e senha
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: senha,
+    });
+    console.log("Resposta do Supabase:", { data, error });
 
-      if (error || !user) {
-        Alert.alert("Erro", "Usuário não encontrado.");
+      if (error) {
+        Alert.alert("Erro", "Erro ao tentar fazer login: " + error.message);
         return;
       }
 
-      // Hash da senha informada
-      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
+  const userId = data.user?.id; // Verifique o ID do usuário retornado
+  if (!userId) {
+    Alert.alert("Erro", "Usuário não encontrado ou não autenticado.");
+    return;
+  }
 
-      // Comparação do hash da senha
-      if (senhaHash !== user.password) {
-        Alert.alert("Erro", "Senha incorreta.");
-        return;
-      }
+    const { data: userData, error: userError } = await supabase
+    .from('user')
+    .select('username')
+    .eq('email', email)
+    .single();  // Espera um único registro
+    if (userError) {
+      Alert.alert("Erro", "Erro ao buscar informações do usuário: " + userError.message);
+      return;
+    }
+
+    console.log("user_metadata:", data.user.user_metadata);
+
+// Verificar se o usuário tem um nome de usuário válido
+const username = userData?.username;
+if (!username) {
+  Alert.alert("Erro", "Dados de usuário inválidos.");
+  return;
+}
 
       // Login bem-sucedido
-      setUser({ username: user.username });
+      setUser({ username, email });
       Alert.alert("Sucesso", "Login realizado com sucesso!");
-      navigation.replace("Home");
+      navigation.replace("Map_Page");
     } catch (err) {
       console.error("Erro ao fazer login:", err);
       Alert.alert("Erro", "Ocorreu um erro ao tentar logar.");
@@ -79,14 +89,14 @@ export default function Login({ navigation }) {
     }
   }
 
-  function informaUsuario(value) {
+  function informaEmail(value) {
     if (!value) {
-      setErroUsuario(true);
+      setErroEmail(true);
     } else {
-      setErroUsuario(false);
+      setErroEmail(false);
     }
 
-    setUsuario(value);
+    setEmail(value);
   }
 
   function informaSenha(value) {
@@ -107,11 +117,11 @@ export default function Login({ navigation }) {
     <View style={styles.container}>
       <RMLogo customStyle={{ marginBottom: 10 }} width={303} height={295} />
       <RMTextInput
-        value={usuario}
-        onChangeText={informaUsuario}
-        placeholder="Digite seu usuário"
+        value={email}
+        onChangeText={informaEmail}
+        placeholder="Digite seu email"
       />
-      {erroUsuario ? <Text>Usuário é obrigatorio</Text> : <></>}
+      {erroEmail ? <Text>Email é obrigatorio</Text> : <></>}
       <RMTextInput
         value={senha}
         onChangeText={informaSenha}

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { supabase } from "../services/supabase";
 
 const Map = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [markers, setMarkers] = useState([]);
 
   // Função para obter a localização atual
   const getCurrentLocation = async () => {
@@ -31,12 +33,44 @@ const Map = () => {
     }
   };
 
-  // Salva um marcador no Supabase
+  /// troubleshoot eterno para salvar o marker sem erro
   const saveMarker = async (newMarker) => {
     try {
-      const { data, error } = await supabase.from('markers').insert([newMarker]);
-      if (error) throw error;
-      setMarkers((prevMarkers) => [...prevMarkers, ...data]); // Atualiza o estado local
+      // Verifique se o usuário está autenticado e obtenha o `user_id`
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Erro ao obter a sessão de usuário:', sessionError.message);
+        return;
+      }
+      if (!sessionData || !sessionData.session) {
+        console.error('Usuário não autenticado');
+        return;
+      }
+
+      const userId = sessionData.session.user.id; // Obtém o ID do usuário da sessão
+      const markerWithUser = {
+        ...newMarker,
+        user_id: userId,  // Adiciona o `user_id` ao marcador
+      };
+
+      // Inclui `.select()` para retornar os dados inseridos
+      const { data, error } = await supabase
+        .from('markers')
+        .insert([markerWithUser])
+        .select();
+
+      console.log('Resposta completa do Supabase:', { data, error });
+      if (error) {
+        console.error('Erro ao salvar no banco:', error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        console.log('Novo marcador inserido:', data);
+        setMarkers((prevMarkers) => [...prevMarkers, ...data]); // Atualiza a lista de marcadores
+      } else {
+        console.error('Erro: resposta do Supabase não contém dados ou está vazia');
+      }
     } catch (error) {
       console.error('Erro ao salvar marcador:', error);
     }
@@ -46,14 +80,13 @@ const Map = () => {
  const handleMapPress = (event) => {
   const { latitude, longitude } = event.nativeEvent.coordinate;
 
-// Exemplo de dados do marcador
   const newMarker = {
     latitude,
     longitude,
     title: 'Novo Marcador',
     description: 'Descrição aqui',
   };
-
+  console.log('Novo marcador:', newMarker);  // Log para verificar a estrutura do marcador
   // Salva o marcador no banco de dados
   saveMarker(newMarker);
 }; 

@@ -71,31 +71,35 @@ export default function CadastroRestaurante({ navigation }) {
     setLoading(true);
 
     try {
-      if (typeof senha !== 'string') {
-        throw new Error('Senha inválida.');
-      }
-      // Criação do hash da senha com SHA-256
-      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: senha,
+      });
 
-      // inserindo supabase
-      const { data, error } = await supabase.from('user').insert([
-        { username: usuario, email, password: senhaHash, CNPJ},
-      ]);
+      if (authError) {
+        Alert.alert('Erro', authError.message);
+        return;
+      }
+ 
+      const { error } = await supabase.from('user').insert([
+      {
+        username: usuario,
+        email: email,
+        password: senha,
+        CNPJ: CNPJ,
+        user_id: data.user.id, // Adiciona o ID do usuário
+      },
+    ]);
 
       if (error) {
         Alert.alert('Erro', error.message);
       } else {
-        //ir pra mapa apos criar conta para cadastrar marker
-        setUser({ username: usuario, email });
-        setToken('placeholder_token');
-
-        Alert.alert('Sucesso', 'Conta criada com sucesso!', 'Agora, clique no mapa onde seu restaurante é localizado, para registrar a localização em nossa base de dados');
-        navigation.replace('Home');
+        Alert.alert("Sucesso", "Conta criada com sucesso! Agora, faça o login e marque no mapa a localização de seu restaurante!");
+        navigation.replace("Login");
       }
-
     } catch (error) {
-      console.error('Erro inesperado:', error);
-      Alert.alert('Erro', 'Ocorreu um erro inesperado.');
+      console.error("Erro inesperado:", error);
+      Alert.alert("Erro", "Ocorreu um erro inesperado.");
     } finally {
       setLoading(false);
     }
