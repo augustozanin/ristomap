@@ -138,12 +138,13 @@ export default function CriaPost({ navigation }) {
 
     try {
       estrelasAvaliadas = estrelas.filter((star) => star).length
-      console.log(user.usuario, titulo, descricao, estrelasAvaliadas, url)
+      console.log(user.username, titulo, descricao, estrelasAvaliadas, url)
+      console.log(user)
 
       // inserindo post no supabase
       const { data, error } = await supabase.from('post').insert([
         {
-          user_username: user.usuario, title: titulo, description: descricao, rating: estrelasAvaliadas,
+          user_username: user.username, title: titulo, description: descricao, rating: estrelasAvaliadas,
           link_img: url
         },
       ]);
