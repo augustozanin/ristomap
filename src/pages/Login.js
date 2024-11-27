@@ -15,7 +15,7 @@ export default function Login({ navigation }) {
   const [erroSenha, setErroSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [passwordInvisible, setPasswordInvisible] = useState(true);
-  const [user, setUser] = useState(null);
+  const { setUser } = useAuth(); // Desestruturar setUser do contexto
 
   async function login() {
     if (loading) {
@@ -63,6 +63,7 @@ export default function Login({ navigation }) {
     .select('username')
     .eq('email', email)
     .single();  // Espera um único registro
+
     if (userError) {
       Alert.alert("Erro", "Erro ao buscar informações do usuário: " + userError.message);
       return;
@@ -78,12 +79,14 @@ if (!username) {
 }
 
       // Login bem-sucedido
-      setUser({ username, email });
+      setUser({ username: userData.username, email });
       Alert.alert("Sucesso", "Login realizado com sucesso!");
       navigation.replace("Map_Page");
+    
     } catch (err) {
       console.error("Erro ao fazer login:", err);
       Alert.alert("Erro", "Ocorreu um erro ao tentar logar.");
+    
     } finally {
       setLoading(false);
     }
