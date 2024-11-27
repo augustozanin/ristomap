@@ -48,10 +48,24 @@ const Map = () => {
       }
 
       const userId = sessionData.session.user.id; // Obtém o ID do usuário da sessão
+
+      // Verifica o CNPJ antes de salvar o marcador
+      const temCNPJ = await verificaCNPJ();
+      if (temCNPJ == 1) {
+        alert('Somente restaurantes podem fazer marcações!');
+        return; // Interrompe o processo se o CNPJ for nulo
+      }
+      if (temCNPJ === null) {
+        alert('Erro ao verificar o CNPJ.');
+        return; // Interrompe o processo se ocorrer algum erro na verificação
+      }
+
       const markerWithUser = {
         ...newMarker,
         user_id: userId,  // Adiciona o `user_id` ao marcador
       };
+      console.log('Dados do usuárioooo', sessionData.session.user.id)
+
 
       // Inclui `.select()` para retornar os dados inseridos
       const { data, error } = await supabase
@@ -61,7 +75,7 @@ const Map = () => {
 
       console.log('Resposta completa do Supabase:', { data, error });
       if (error) {
-        console.error('Erro ao salvar no banco:', error.message);
+        alert('Erro ao salvar no banco:' + error.message);
         return;
       }
 
@@ -72,28 +86,50 @@ const Map = () => {
         console.error('Erro: resposta do Supabase não contém dados ou está vazia');
       }
     } catch (error) {
-      console.error('Erro ao salvar marcador:', error);
+      alert('Erro ao salvar marcador:', error);
     }
   };
 
- // Adiciona um marcador ao pressionar o mapa
- const handleMapPress = (event) => {
-  const { latitude, longitude } = event.nativeEvent.coordinate;
+  const verificaCNPJ = async () => {
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      uuidUsuario = sessionData.session.user.id
+      const { data, error } = await supabase
+        .from('user')
+        .select('CNPJ')
+        .eq('user_id', uuidUsuario);
+      const dado_cpnj = data?.[0]?.CNPJ
+      // Verifica se o CNPJ é nulo ou não
+      console.log('Dados do cnpj', dado_cpnj)
+      if (dado_cpnj == null) {
+        console.log("O CNPJ é nulo.");
+        return 1
+      } else {
+        console.log("O CNPJ não é nulo.");
+        return 0
+      }
+    } catch (error) {
+      console.error("Erro inesperado:", error);
+    }
+  }
 
-  const newMarker = {
-    latitude,
-    longitude,
-    title: 'Novo Marcador',
-    description: 'Descrição aqui',
+  // Adiciona um marcador ao pressionar o mapa
+  const handleMapPress = async (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    const newMarker = {
+      latitude,
+      longitude,
+      title: 'Novo Marcador',
+      description: 'Descrição aqui',
+    };
+    console.log('Novo marcador:', newMarker);  // Log para verificar a estrutura do marcador
+    // Salva o marcador no banco de dados
+    saveMarker(newMarker);
   };
-  console.log('Novo marcador:', newMarker);  // Log para verificar a estrutura do marcador
-  // Salva o marcador no banco de dados
-  saveMarker(newMarker);
-}; 
 
   useEffect(() => {
     getCurrentLocation();
-    fetchMarkers ();
+    fetchMarkers();
   }, []);
 
   // Define o fallback de coordenadas caso não permita acesso à localização do celular
@@ -113,7 +149,7 @@ const Map = () => {
         followsUserLocation={true}
         onPress={handleMapPress} // Permite criar marcadores ao pressionar o mapa
       >
-       {markers.map((marker, index) => (
+        {markers.map((marker, index) => (
           <Marker
             key={index}
             coordinate={{
