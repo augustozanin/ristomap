@@ -64,7 +64,7 @@ const Map = () => {
         ...newMarker,
         user_id: userId,  // Adiciona o `user_id` ao marcador
       };
-      console.log('Dados do usuárioooo', sessionData.session.user.id)
+      console.log('Dados do usuário', sessionData.session.user.id)
 
 
       // Inclui `.select()` para retornar os dados inseridos

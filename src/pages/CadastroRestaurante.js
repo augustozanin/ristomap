@@ -7,7 +7,6 @@ import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../styles/styles";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabase";
-import CryptoJS from "crypto-js";
 
 export default function CadastroRestaurante({ navigation }) {
   const [usuario, setUsuario] = useState(null);
@@ -94,7 +93,7 @@ export default function CadastroRestaurante({ navigation }) {
       if (error) {
         Alert.alert('Erro', error.message);
       } else {
-        Alert.alert("Sucesso", "Conta criada com sucesso! Agora, faça o login e marque no mapa a localização de seu restaurante!");
+        Alert.alert("Sucesso", "Conta criada com sucesso! Agora, confirme seu e-mail, faça o login e marque no mapa a localização de seu restaurante!");
         navigation.replace("Login");
       }
     } catch (error) {

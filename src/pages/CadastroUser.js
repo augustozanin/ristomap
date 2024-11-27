@@ -63,32 +63,38 @@ export default function CadastroUser({ navigation }) {
 
     setLoading(true);
 
-    try {
-      if (typeof senha !== 'string') {
-        throw new Error('Senha inválida.');
-      }
-      // Criação do hash da senha com SHA-256
-      const senhaHash = CryptoJS.SHA256(senha).toString(CryptoJS.enc.Hex);
 
-      // inserindo supabase
-      const { data, error } = await supabase.from('user').insert([
-        { username: usuario, email, password: senhaHash },
-      ]);
+    setLoading(true);
+
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: senha,
+      });
+
+      if (authError) {
+        Alert.alert('Erro', authError.message);
+        return;
+      }
+ 
+      const { error } = await supabase.from('user').insert([
+      {
+        username: usuario,
+        email: email,
+        password: senha,
+        user_id: data.user.id, // Adiciona o ID do usuário
+      },
+    ]);
 
       if (error) {
         Alert.alert('Erro', error.message);
       } else {
-        //ir pra home apos criar conta
-        setUser({ username: usuario, email });
-        setToken('placeholder_token');
-
-        Alert.alert('Sucesso', 'Conta criada com sucesso!');
-        navigation.replace('Home');
+        Alert.alert("Sucesso", "Conta criada com sucesso! Confirme seu e-mail e realize o login!");
+        navigation.replace("Login");
       }
-
     } catch (error) {
-      console.error('Erro inesperado:', error);
-      Alert.alert('Erro', 'Ocorreu um erro inesperado.');
+      console.error("Erro inesperado:", error);
+      Alert.alert("Erro", "Ocorreu um erro inesperado.");
     } finally {
       setLoading(false);
     }
@@ -114,7 +120,7 @@ export default function CadastroUser({ navigation }) {
         onChangeText={setEmail}
         placeholder="Digite seu email"
       />
-      {erroEmail ? <Text>email é obrigatorio</Text> : <></>}
+      {erroEmail ? <Text>Email é obrigatorio</Text> : <></>}
 
       <RMTextInput
         value={senha}
