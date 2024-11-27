@@ -15,9 +15,14 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jmcdambros.apptest"
     },
-    "web": {
+    "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "3bfffa7d-88bc-41f0-9824-315b740b9713"
+      }
     }
   }
 }

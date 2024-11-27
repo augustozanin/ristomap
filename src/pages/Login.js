@@ -81,7 +81,7 @@ if (!username) {
       // Login bem-sucedido
       setUser({ username: userData.username, email });
       Alert.alert("Sucesso", "Login realizado com sucesso!");
-      navigation.replace("Map_Page");
+      navigation.replace("Home");
     
     } catch (err) {
       console.error("Erro ao fazer login:", err);
